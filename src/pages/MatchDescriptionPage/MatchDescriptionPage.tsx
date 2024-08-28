@@ -1,62 +1,153 @@
-import { type FC, useMemo } from 'react';
-import { useInitData, useLaunchParams, type User } from '@telegram-apps/sdk-react';
-import { List, Placeholder } from '@telegram-apps/telegram-ui';
+import { type FC, useMemo, useState } from "react";
+import {
+  useInitData,
+  useLaunchParams,
+  type User,
+} from "@telegram-apps/sdk-react";
+import { useParams } from "react-router-dom";
+import {
+  Accordion,
+  Avatar,
+  Blockquote,
+  List,
+  Placeholder,
+  Section,
+} from "@telegram-apps/telegram-ui";
+import {
+  useQuery,
+  useMutation,
+  useQueryClient,
+  QueryClient,
+  QueryClientProvider,
+} from "react-query";
 
-import { DisplayData, type DisplayDataRow } from '@/components/DisplayData/DisplayData.tsx';
+import {
+  DisplayData,
+  type DisplayDataRow,
+} from "@/components/DisplayData/DisplayData.tsx";
+import { AccordionSummary } from "@telegram-apps/telegram-ui/dist/components/Blocks/Accordion/components/AccordionSummary/AccordionSummary";
+import { AccordionContent } from "@telegram-apps/telegram-ui/dist/components/Blocks/Accordion/components/AccordionContent/AccordionContent";
 
 function getUserRows(user: User): DisplayDataRow[] {
   return [
-    { title: 'id', value: user.id.toString() },
-    { title: 'username', value: user.username },
-    { title: 'photo_url', value: user.photoUrl },
-    { title: 'last_name', value: user.lastName },
-    { title: 'first_name', value: user.firstName },
-    { title: 'is_bot', value: user.isBot },
-    { title: 'is_premium', value: user.isPremium },
-    { title: 'language_code', value: user.languageCode },
-    { title: 'allows_to_write_to_pm', value: user.allowsWriteToPm },
-    { title: 'added_to_attachment_menu', value: user.addedToAttachmentMenu },
+    { title: "id", value: user.id.toString() },
+    { title: "username", value: user.username },
+    { title: "photo_url", value: user.photoUrl },
+    { title: "last_name", value: user.lastName },
+    { title: "first_name", value: user.firstName },
+    { title: "is_bot", value: user.isBot },
+    { title: "is_premium", value: user.isPremium },
+    { title: "language_code", value: user.languageCode },
+    { title: "allows_to_write_to_pm", value: user.allowsWriteToPm },
+    { title: "added_to_attachment_menu", value: user.addedToAttachmentMenu },
   ];
 }
 
 export const MatchDescriptionPage: FC = () => {
-  const initDataRaw = useLaunchParams().initDataRaw;
+  const [data, setData] = useState();
+  const [accordionExpaned, setAccordionExpaned] = useState(false);
+  const [accordionExpaned1, setAccordionExpaned1] = useState(false);
+  const [accordionExpaned2, setAccordionExpaned2] = useState(true);
+  // const [accordionExpaned3, setAccordionExpaned3] = useState(true);
   const initData = useInitData();
+  const { id } = useParams();
 
-  const initDataRows = useMemo<DisplayDataRow[] | undefined>(() => {
-    if (!initData || !initDataRaw) {
+  useQuery(
+    ["todos", id],
+    async () => {
+      const response = await fetch(
+        `https://sport-highlights-api.p.rapidapi.com/football/matches/${id}`,
+        {
+          headers: new Headers({
+            "x-rapidapi-key":
+              "71b1972553msh9ebbdd4d3dbc3d6p1dc394jsn8b986ade594b",
+            "x-rapidapi-host": "sport-highlights-api.p.rapidapi.com",
+          }),
+        }
+      );
+
+      return response.json();
+    },
+    {
+      onSuccess: (data) => {
+        setData(data[0]);
+      },
+    }
+  );
+
+  console.log(data);
+
+  const basicDataRows = useMemo<DisplayDataRow[] | undefined>(() => {
+    if (!data) {
       return;
     }
+
     const {
-      hash,
-      queryId,
-      chatType,
-      chatInstance,
-      authDate,
-      startParam,
-      canSendAfter,
-      canSendAfterDate,
-    } = initData;
+      country,
+      league,
+      referee,
+    } = data;
     return [
-      { title: 'raw', value: initDataRaw },
-      { title: 'auth_date', value: authDate.toLocaleString() },
-      { title: 'auth_date (raw)', value: authDate.getTime() / 1000 },
-      { title: 'hash', value: hash },
-      { title: 'can_send_after', value: canSendAfterDate?.toISOString() },
-      { title: 'can_send_after (raw)', value: canSendAfter },
-      { title: 'query_id', value: queryId },
-      { title: 'start_param', value: startParam },
-      { title: 'chat_type', value: chatType },
-      { title: 'chat_instance', value: chatInstance },
+      {
+        title: "Страна",
+        value: (
+          <div style={{ display: 'flex', gap: '4px' }}>
+            <Avatar size={20} src={country?.logo} />  {country?.name}
+          </div>
+        ),
+      },
+      {
+        title: "Лига",
+        value: (
+          <div style={{ display: 'flex', gap: '4px' }}>
+            <Avatar size={20} src={league?.logo} /> {league?.name}
+          </div>
+        ),
+      },
+      { title: "Рефери", value: referee.name || "Неизвестен" }
     ];
-  }, [initData, initDataRaw]);
+  }, [data]);
 
   const userRows = useMemo<DisplayDataRow[] | undefined>(() => {
-    return initData && initData.user ? getUserRows(initData.user) : undefined;
-  }, [initData]);
+    return [
+      {title: 'Победа принимающей команды', value: '45.245%'},
+      {title: 'Ничья', value: '26.614%'},
+      {title: 'Победа гостевой команды', value: '28.136%'},
+
+    ]
+  }, [data]);
+
+  const homeTeamData = useMemo<DisplayDataRow[] | undefined>(() => {
+    console.log('qwe',data)
+    if (!data?.homeTeam) {
+      return;
+    }
+    const { name, logo } = data.homeTeam;
+
+
+    return [
+      { title: "Название", value: <><Avatar size={20} src={logo} />{name}</> },
+    ];
+  }, [data]);
+
+  const awayTeamData = useMemo<DisplayDataRow[] | undefined>(() => {
+    console.log('qwe',data)
+    if (!data?.awayTeam) {
+      return;
+    }
+    const { name, logo } = data.awayTeam;
+
+
+    return [
+      { title: "Название", value: <><Avatar size={20} src={logo} />{name}</> },
+    ];
+  }, [data]);
+
 
   const receiverRows = useMemo<DisplayDataRow[] | undefined>(() => {
-    return initData && initData.receiver ? getUserRows(initData.receiver) : undefined;
+    return initData && initData.receiver
+      ? getUserRows(initData.receiver)
+      : undefined;
   }, [initData]);
 
   const chatRows = useMemo<DisplayDataRow[] | undefined>(() => {
@@ -66,15 +157,15 @@ export const MatchDescriptionPage: FC = () => {
     const { id, title, type, username, photoUrl } = initData.chat;
 
     return [
-      { title: 'id', value: id.toString() },
-      { title: 'title', value: title },
-      { title: 'type', value: type },
-      { title: 'username', value: username },
-      { title: 'photo_url', value: photoUrl },
+      { title: "id", value: id.toString() },
+      { title: "title", value: title },
+      { title: "type", value: type },
+      { title: "username", value: username },
+      { title: "photo_url", value: photoUrl },
     ];
   }, [initData]);
 
-  if (!initDataRows) {
+  if (!basicDataRows) {
     return (
       <Placeholder
         header="Oops"
@@ -83,17 +174,93 @@ export const MatchDescriptionPage: FC = () => {
         <img
           alt="Telegram sticker"
           src="https://xelene.me/telegram.gif"
-          style={{ display: 'block', width: '144px', height: '144px' }}
+          style={{ display: "block", width: "144px", height: "144px" }}
         />
       </Placeholder>
     );
   }
   return (
     <List>
-      <DisplayData header={'Init Data'} rows={initDataRows}/>
-      {userRows && <DisplayData header={'User'} rows={userRows}/>}
-      {receiverRows && <DisplayData header={'Receiver'} rows={receiverRows}/>}
-      {chatRows && <DisplayData header={'Chat'} rows={chatRows}/>}
+      {userRows && <DisplayData header={"ИИ прогноз"} rows={userRows} />}
+      <Section>
+        <Accordion
+          expanded={accordionExpaned2}
+          onChange={() => {
+            setAccordionExpaned2(!accordionExpaned2);
+          }}
+        >
+          <AccordionSummary>Общие данные</AccordionSummary>
+          <AccordionContent>
+            <div
+              style={{
+                padding: "10px 20px 20px",
+              }}
+            >
+              <DisplayData rows={basicDataRows} />
+            </div>
+          </AccordionContent>
+        </Accordion>
+      </Section>
+      <Section>
+        <Accordion
+          expanded={accordionExpaned}
+          onChange={() => {
+            setAccordionExpaned(!accordionExpaned);
+          }}
+        >
+          <AccordionSummary>Принимающая команда</AccordionSummary>
+          <AccordionContent>
+            <div
+              style={{
+                padding: "10px 20px 20px",
+              }}
+            >
+              <DisplayData rows={homeTeamData} />
+            </div>
+          </AccordionContent>
+        </Accordion>
+      </Section>
+      <Section>
+        <Accordion
+          expanded={accordionExpaned1}
+          onChange={() => {
+            setAccordionExpaned1(!accordionExpaned1);
+          }}
+        >
+          <AccordionSummary>Гостевая команда</AccordionSummary>
+          <AccordionContent>
+            <div
+              style={{
+                padding: "10px 20px 20px",
+              }}
+            >
+              <DisplayData rows={awayTeamData} />
+            </div>
+          </AccordionContent>
+        </Accordion>
+      </Section>
+      
+      {/* <Section>
+        <Accordion
+          expanded={accordionExpaned3}
+          onChange={() => {
+            setAccordionExpaned3(!accordionExpaned3);
+          }}
+        >
+          <AccordionSummary>Погода</AccordionSummary>
+          <AccordionContent>
+            <div
+              style={{
+                padding: "10px 20px 20px",
+              }}
+            >
+            </div>
+          </AccordionContent>
+        </Accordion>
+      </Section> */}
+
+      {receiverRows && <DisplayData header={"Receiver"} rows={receiverRows} />}
+      {chatRows && <DisplayData header={"Chat"} rows={chatRows} />}
     </List>
   );
 };

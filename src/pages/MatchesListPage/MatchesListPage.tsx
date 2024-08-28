@@ -1,44 +1,69 @@
-import { type FC } from "react";
-import { List } from "@telegram-apps/telegram-ui";
+import { useEffect, useState, type FC } from "react";
+import { Avatar, List } from "@telegram-apps/telegram-ui";
+import {
+  useQuery,
+  useMutation,
+  useQueryClient,
+  QueryClient,
+  QueryClientProvider,
+} from "react-query";
 
 import { MatchListItem } from "@/components/Match/MatchListItem";
 
+function getFlagEmoji(countryCode) {
+  const codePoints = countryCode
+    .toUpperCase()
+    .split("")
+    .map((char) => 127397 + char.charCodeAt());
+  return String.fromCodePoint(...codePoints);
+}
+
 export const MatchesListPage: FC = () => {
-  const dataRow1 = [
-    { title: "Крылья Советов - Факел Воронеж", value: "11.08 19:30" },
-    { title: "Спартак - Ахмат", value: "11.08 22:00" },
-  ];
+  const [data, setData] = useState([]);
 
-  const dataRow2 = [
-    { title: "Гоу Эхед Иглз - Фортуна Ситтард", value: "11.08 17:30" },
-    { title: "Утрехт - Зволле", value: "11.08 17:30" },
-    { title: "Аякс - Херенвен", value: "11.08 19:45" },
-  ];
+  useQuery(
+    "todos",
+    async () => {
+      const response = await fetch(
+        "https://sport-highlights-api.p.rapidapi.com/football/matches?date=2024-08-23",
+        {
+          headers: new Headers({
+            "x-rapidapi-key":
+              "71b1972553msh9ebbdd4d3dbc3d6p1dc394jsn8b986ade594b",
+            "x-rapidapi-host": "sport-highlights-api.p.rapidapi.com",
+          }),
+        }
+      );
 
-  const dataRow3 = [
-    { title: "Эшторил - Санта Клара", value: "11.08 19:30" },
-    { title: "Фамаликан - Бенфика", value: "11.08 22:00" },
-    { title: "Фаренсе - Морейренсе", value: "11.08 22:00" },
-    { title: "Брага - Эштрела", value: "11.08 00:30" },
-  ];
+      return response.json();
+    },
+    {
+      onSuccess: (data) => {
+        const mappedByLeadue = data.data.reduce((acc, cur) => {
+          return {
+            ...acc,
+            [cur.league.name]: [...(acc[cur.league.name] || []), cur],
+          };
+        }, {});
 
-  const dataRow4 = [{ title: "Брешиа - Венеция", value: "11.08 21:00" }];
+        setData(mappedByLeadue);
+      },
+    }
+  );
+
+  console.log(data);
 
   return (
     <List>
-      <MatchListItem
-        header={"🇷🇺 Чемпионат России. Премьер-лига"}
-        rows={dataRow1}
-      />
-      <MatchListItem
-        header={"🇳🇱 Чемпионат Нидерландов. Эредивизи"}
-        rows={dataRow2}
-      />
-      <MatchListItem
-        header={"🇵🇹 Чемпионат Португалии. Премьер-лига"}
-        rows={dataRow3}
-      />
-      <MatchListItem header={"🇮🇹 Кубок Италии"} rows={dataRow4} />
+      {Object.entries(data).map(([key, value]) => {
+        return (
+          <MatchListItem
+            key={key}
+            header={`${getFlagEmoji(value[0].country.code)} ${key}`}
+            rows={value}
+          />
+        );
+      })}
     </List>
   );
 };

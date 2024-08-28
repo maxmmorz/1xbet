@@ -18,12 +18,12 @@ interface Route {
 export const routes: Route[] = [
   { path: '/', Component: IndexPage },
   { path: '/matches-list', Component: MatchesListPage, title: 'Init Data' },
-  { path: '/match-description', Component: MatchDescriptionPage, title: 'Init Data' },
+  { path: '/match-description/:id', Component: MatchDescriptionPage, title: 'Init Data' },
   { path: '/init-data', Component: InitDataPage, title: 'Init Data mock' },
   { path: '/theme-params', Component: ThemeParamsPage, title: 'Theme Params' },
   { path: '/launch-params', Component: LaunchParamsPage, title: 'Launch Params' },
   {
-    path: '/ton-connect',
+    path: '/',
     Component: TONConnectPage,
     title: 'TON Connect',
     icon: (

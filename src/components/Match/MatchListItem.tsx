@@ -1,5 +1,5 @@
 import { isRGB } from "@telegram-apps/sdk-react";
-import { Cell, Checkbox, Section } from "@telegram-apps/telegram-ui";
+import { Avatar, Cell, Checkbox, Section } from "@telegram-apps/telegram-ui";
 import type { FC, ReactNode } from "react";
 
 import { RGB } from "@/components/RGB/RGB.tsx";
@@ -42,14 +42,33 @@ export const MatchListItem: FC<DisplayDataProps> = ({ header, rows }) => (
       }
 
       return (
-        <Link to="/match-description" key={idx}>
+        <Link to={`/match-description/${item.id}`} key={idx}>
           <Cell
             className="display-data__line"
-            subhead={item.title}
+            subhead={
+              <span
+                style={{ display: "flex", justifyContent: "space-between" }}
+              >
+                <div style={{ display: "flex", justifyContent: 'space-evenly', alignItems: 'center', gap: '4px' }}>
+                  <Avatar size={20} src={item.homeTeam?.logo} />
+                  <h4>{item.homeTeam?.name}</h4>
+                </div>
+
+                <div style={{ display: "flex", justifyContent: 'space-evenly', alignItems: 'center', gap: '4px' }}>
+                  <h4>{item.awayTeam?.name}</h4>
+                  <Avatar size={20} src={item.awayTeam?.logo} />
+                </div>
+              </span>
+            }
+            subtitle={<span className="display-data__line-value">{`${new Date(
+              item.date
+            ).toDateString()} ${new Date(item.date).toLocaleTimeString(
+              "en-GB",
+              { hour: "2-digit", minute: "2-digit" }
+            )}`}</span>}
             readOnly
             multiline={true}
           >
-            <span className="display-data__line-value">{valueNode}</span>
           </Cell>
         </Link>
       );

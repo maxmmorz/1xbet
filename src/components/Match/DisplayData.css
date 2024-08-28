@@ -4,6 +4,8 @@
 
 .display-data__line {
   padding: 16px 24px;
+  display: flex;
+  justify-content: space-between;
 }
 
 .display-data__line-title {
