@@ -1,38 +1,27 @@
-import { useEffect, useState, type FC } from "react";
-import { Avatar, List } from "@telegram-apps/telegram-ui";
+import { useState, type FC } from "react";
 import {
-  useQuery,
-  useMutation,
-  useQueryClient,
-  QueryClient,
-  QueryClientProvider,
-} from "react-query";
+  Avatar,
+  Headline,
+  InlineButtons,
+  List,
+} from "@telegram-apps/telegram-ui";
+import { useQuery } from "react-query";
+import moment from "moment";
+import "moment/dist/locale/ru";
 
 import { MatchListItem } from "@/components/Match/MatchListItem";
 
-function getFlagEmoji(countryCode) {
-  const codePoints = countryCode
-    .toUpperCase()
-    .split("")
-    .map((char) => 127397 + char.charCodeAt());
-  return String.fromCodePoint(...codePoints);
-}
+moment.locale("ru");
 
 export const MatchesListPage: FC = () => {
   const [data, setData] = useState([]);
+  const [searchDate, setSearchDate] = useState(moment().format("YYYY-MM-DD"));
 
   useQuery(
-    "todos",
+    ["fixtures", searchDate],
     async () => {
       const response = await fetch(
-        "https://sport-highlights-api.p.rapidapi.com/football/matches?date=2024-08-23",
-        {
-          headers: new Headers({
-            "x-rapidapi-key":
-              "71b1972553msh9ebbdd4d3dbc3d6p1dc394jsn8b986ade594b",
-            "x-rapidapi-host": "sport-highlights-api.p.rapidapi.com",
-          }),
-        }
+        `http://localhost:3001/api/fixtures/date/${searchDate}?include=participants;league;league.country`
       );
 
       return response.json();
@@ -51,19 +40,92 @@ export const MatchesListPage: FC = () => {
     }
   );
 
-  console.log(data);
-
   return (
-    <List>
-      {Object.entries(data).map(([key, value]) => {
-        return (
-          <MatchListItem
-            key={key}
-            header={`${getFlagEmoji(value[0].country.code)} ${key}`}
-            rows={value}
-          />
-        );
-      })}
-    </List>
+    <>
+      <List style={{ paddingBottom: "50px" }}>
+        {Object.entries(data).map(([key, value]) => {
+          return (
+            <MatchListItem
+              key={key}
+              header={
+                <Headline
+                  weight="1"
+                  style={{
+                    paddingLeft: "24px",
+                    paddingTop: "12px",
+                    paddingBottom: "12px",
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 10,
+                    position: "sticky",
+                    top: 0,
+                    zIndex: 10,
+                    backgroundColor: "#17212B",
+                  }}
+                >
+                  <Avatar size={28} src={value[0].league.country.image_path} />
+                  {value[0]?.league.name}
+                </Headline>
+              }
+              rows={value}
+            />
+          );
+        })}
+      </List>
+      <InlineButtons
+        mode="plain"
+        style={{
+          width: "100vw",
+          overflow: "scroll",
+          position: "fixed",
+          bottom: 0,
+          backgroundColor: "#212121",
+          zIndex: "10",
+        }}
+      >
+        <InlineButtons.Item
+          style={{
+            backgroundColor:
+              searchDate === moment().format("YYYY-MM-DD")
+                ? "#2f2f2f"
+                : "#212121",
+          }}
+          onClick={() => {
+            setSearchDate(moment().format("YYYY-MM-DD"));
+          }}
+          mode="bezeled"
+        >
+          Сегодня
+        </InlineButtons.Item>
+        <InlineButtons.Item
+          style={{
+            backgroundColor:
+              searchDate === moment().add(1, "day").format("YYYY-MM-DD")
+                ? "#2f2f2f"
+                : "#212121",
+          }}
+          onClick={() => {
+            setSearchDate(moment().add(1, "day").format("YYYY-MM-DD"));
+          }}
+          text={moment().add(1, "day").format("DD")}
+        >
+          {moment().add(1, "day").format("MMM")}
+        </InlineButtons.Item>
+        <InlineButtons.Item
+          style={{
+            backgroundColor:
+              searchDate === moment().add(2, "day").format("YYYY-MM-DD")
+                ? "#2f2f2f"
+                : "#212121",
+          }}
+          onClick={() => {
+            setSearchDate(moment().add(2, "day").format("YYYY-MM-DD"));
+          }}
+          text={moment().add(2, "day").format("DD")}
+        >
+          {moment().add(2, "day").format("MMM")}
+        </InlineButtons.Item>
+      </InlineButtons>
+    </>
   );
 };

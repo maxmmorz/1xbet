@@ -21,14 +21,14 @@ export const IndexPage: FC = () => {
         header="Главная страница"
         // footer='You can use these pages to learn more about features, provided by Telegram Mini Apps and other useful projects'
       >
-        <Link to="/ton-connect">
+        <Link to="/">
           <Cell
             before={
               <Image src={tonSvg} style={{ backgroundColor: "#007AFF" }} />
             }
-            subtitle="ИИ прогнозы"
+            subtitle="Прогнозы искусственного интеллекта"
           >
-            1xBet
+            1XBET
           </Cell>
         </Link>
       </Section>
@@ -37,13 +37,13 @@ export const IndexPage: FC = () => {
       // footer='These pages help developer to learn more about current launch information'
       >
         <Link to="/matches-list">
-          <Cell subtitle="Лиги, матчи">Предстоящие матчи</Cell>
+          <Cell>Выберать Лигу и Матч</Cell>
         </Link>
         {/* <Link to='/init-data'>
           <Cell subtitle='Лиги, матчи'>Предстоящие матчи</Cell>
         </Link> */}
-        <Link to="/theme-params">
-          <Cell subtitle="История наших прогнозов">История прогнозов</Cell>
+        <Link to="/">
+          <Cell>История прогнозов Искусственного Интеллекта</Cell>
         </Link>
         <Link to="/launch-params">
           <Cell subtitle="Пользовательская информация">Настройки</Cell>
@@ -57,18 +57,14 @@ export const IndexPage: FC = () => {
         >
           <Link to="https://www.youtube.com/@1XBETKZ/videos">
             <Cell
-              before={
-                <Image src={ytSvg} style={{ backgroundColor: "#fff" }} />
-              }
+              before={<Image src={ytSvg} style={{ backgroundColor: "#fff" }} />}
             >
               YouTube
             </Cell>
           </Link>
           <Link to="https://web.telegram.org/a/#-1001491966465">
             <Cell
-              before={
-                <Image src={tgSvg} style={{ backgroundColor: "#fff" }} />
-              }
+              before={<Image src={tgSvg} style={{ backgroundColor: "#fff" }} />}
             >
               YouTube
             </Cell>

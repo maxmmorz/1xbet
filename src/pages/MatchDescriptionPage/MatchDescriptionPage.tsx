@@ -1,266 +1,206 @@
 import { type FC, useMemo, useState } from "react";
-import {
-  useInitData,
-  useLaunchParams,
-  type User,
-} from "@telegram-apps/sdk-react";
 import { useParams } from "react-router-dom";
+import { Avatar, Divider, Headline, Section, TabsList } from "@telegram-apps/telegram-ui";
+import { useQuery } from "react-query";
+import { DisplayData } from "@/components/DisplayData/DisplayData";
+import moment from "moment";
+import { PrematchDisplayData } from "@/components/PrematchDisplayData/PrematchDisplayData";
 import {
-  Accordion,
-  Avatar,
-  Blockquote,
-  List,
-  Placeholder,
-  Section,
-} from "@telegram-apps/telegram-ui";
-import {
-  useQuery,
-  useMutation,
-  useQueryClient,
-  QueryClient,
-  QueryClientProvider,
-} from "react-query";
-
-import {
-  DisplayData,
-  type DisplayDataRow,
-} from "@/components/DisplayData/DisplayData.tsx";
-import { AccordionSummary } from "@telegram-apps/telegram-ui/dist/components/Blocks/Accordion/components/AccordionSummary/AccordionSummary";
-import { AccordionContent } from "@telegram-apps/telegram-ui/dist/components/Blocks/Accordion/components/AccordionContent/AccordionContent";
-
-function getUserRows(user: User): DisplayDataRow[] {
-  return [
-    { title: "id", value: user.id.toString() },
-    { title: "username", value: user.username },
-    { title: "photo_url", value: user.photoUrl },
-    { title: "last_name", value: user.lastName },
-    { title: "first_name", value: user.firstName },
-    { title: "is_bot", value: user.isBot },
-    { title: "is_premium", value: user.isPremium },
-    { title: "language_code", value: user.languageCode },
-    { title: "allows_to_write_to_pm", value: user.allowsWriteToPm },
-    { title: "added_to_attachment_menu", value: user.addedToAttachmentMenu },
-  ];
-}
+  PredictionsDisplayData,
+  PredictionsDisplayDataProps,
+} from "@/components/PredictionsDisplayData/PredictionsDisplayData";
 
 export const MatchDescriptionPage: FC = () => {
   const [data, setData] = useState();
-  const [accordionExpaned, setAccordionExpaned] = useState(false);
-  const [accordionExpaned1, setAccordionExpaned1] = useState(false);
-  const [accordionExpaned2, setAccordionExpaned2] = useState(true);
-  // const [accordionExpaned3, setAccordionExpaned3] = useState(true);
-  const initData = useInitData();
+  const [predictions, setPredictions] = useState<PredictionsDisplayDataProps>();
+  const [selectedTab, setSelectedTab] = useState("predictions");
   const { id } = useParams();
 
   useQuery(
-    ["todos", id],
+    ["data", id],
     async () => {
       const response = await fetch(
-        `https://sport-highlights-api.p.rapidapi.com/football/matches/${id}`,
-        {
-          headers: new Headers({
-            "x-rapidapi-key":
-              "71b1972553msh9ebbdd4d3dbc3d6p1dc394jsn8b986ade594b",
-            "x-rapidapi-host": "sport-highlights-api.p.rapidapi.com",
-          }),
-        }
+        `http://localhost:3001/api/fixtures/${id}?include=participants;league;league.country;predictions;predictions.type`
       );
 
       return response.json();
     },
     {
       onSuccess: (data) => {
-        setData(data[0]);
+        const mappedByPredictionType = data.data.predictions.reduce(
+          (acc, cur) => ({
+            ...acc,
+            [cur.type.developer_name]: cur,
+          }),
+          {}
+        );
+
+        const winnerPredictions =
+          mappedByPredictionType.FULLTIME_RESULT_PROBABILITY.predictions;
+        const doubleChancePredictions =
+          mappedByPredictionType.DOUBLE_CHANCE_PROBABILITY.predictions;
+        const bothTeamsScorePredictions =
+          mappedByPredictionType.BTTS_PROBABILITY.predictions;
+        const correctScorePredictions =
+          mappedByPredictionType.CORRECT_SCORE_PROBABILITY.predictions.scores;
+
+        const formattedData: PredictionsDisplayDataProps = {
+          winner: {
+            "1": winnerPredictions.home,
+            X: winnerPredictions.draw,
+            "2": winnerPredictions.away,
+          },
+          doubleChance: {
+            "1/X": doubleChancePredictions.draw_home,
+            "2/X": doubleChancePredictions.draw_away,
+            "1/2": doubleChancePredictions.home_away,
+          },
+          bothTeamsScore: {
+            yes: bothTeamsScorePredictions.yes,
+            no: bothTeamsScorePredictions.no,
+          },
+          moreLess: {
+            "1.5": {
+              yes: mappedByPredictionType.OVER_UNDER_1_5_PROBABILITY.predictions
+                .yes,
+              no: mappedByPredictionType.OVER_UNDER_1_5_PROBABILITY.predictions
+                .no,
+            },
+            "2.5": {
+              yes: mappedByPredictionType.OVER_UNDER_2_5_PROBABILITY.predictions
+                .yes,
+              no: mappedByPredictionType.OVER_UNDER_2_5_PROBABILITY.predictions
+                .no,
+            },
+            "3.5": {
+              yes: mappedByPredictionType.OVER_UNDER_3_5_PROBABILITY.predictions
+                .yes,
+              no: mappedByPredictionType.OVER_UNDER_3_5_PROBABILITY.predictions
+                .no,
+            },
+            "4.5": {
+              yes: mappedByPredictionType.OVER_UNDER_3_5_PROBABILITY.predictions
+                .yes,
+              no: mappedByPredictionType.OVER_UNDER_3_5_PROBABILITY.predictions
+                .no,
+            },
+          },
+          correctScore: {
+            "0-0": correctScorePredictions["0-0"],
+            "0-1": correctScorePredictions["0-1"],
+            "0-2": correctScorePredictions["0-2"],
+            "0-3": correctScorePredictions["0-3"],
+            "1-0": correctScorePredictions["1-0"],
+            "1-1": correctScorePredictions["1-1"],
+            "1-2": correctScorePredictions["1-2"],
+            "1-3": correctScorePredictions["1-3"],
+            "2-0": correctScorePredictions["2-0"],
+            "2-1": correctScorePredictions["2-1"],
+            "2-2": correctScorePredictions["2-2"],
+            "2-3": correctScorePredictions["2-3"],
+            "3-0": correctScorePredictions["3-0"],
+            "3-1": correctScorePredictions["3-1"],
+            "3-2": correctScorePredictions["3-2"],
+            "3-3": correctScorePredictions["3-3"],
+          },
+        };
+
+        setPredictions(formattedData);
+        setData(data.data);
       },
     }
   );
 
-  console.log(data);
+  console.log("qwe1", data);
 
-  const basicDataRows = useMemo<DisplayDataRow[] | undefined>(() => {
-    if (!data) {
-      return;
-    }
-
-    const {
-      country,
-      league,
-      referee,
-    } = data;
+  const userRows = useMemo(() => {
     return [
+      { value: moment(data?.starting_at).format("HH:mm - DD MMMM YYYY") },
       {
-        title: "Страна",
         value: (
-          <div style={{ display: 'flex', gap: '4px' }}>
-            <Avatar size={20} src={country?.logo} />  {country?.name}
+          <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+            <Avatar size={40} src={data?.league.country.image_path} />
+            <Headline weight="3">{data?.league.name}</Headline>
           </div>
         ),
       },
-      {
-        title: "Лига",
-        value: (
-          <div style={{ display: 'flex', gap: '4px' }}>
-            <Avatar size={20} src={league?.logo} /> {league?.name}
-          </div>
-        ),
-      },
-      { title: "Рефери", value: referee.name || "Неизвестен" }
     ];
   }, [data]);
 
-  const userRows = useMemo<DisplayDataRow[] | undefined>(() => {
-    return [
-      {title: 'Победа принимающей команды', value: '45.245%'},
-      {title: 'Ничья', value: '26.614%'},
-      {title: 'Победа гостевой команды', value: '28.136%'},
-
-    ]
-  }, [data]);
-
-  const homeTeamData = useMemo<DisplayDataRow[] | undefined>(() => {
-    console.log('qwe',data)
-    if (!data?.homeTeam) {
-      return;
-    }
-    const { name, logo } = data.homeTeam;
-
-
-    return [
-      { title: "Название", value: <><Avatar size={20} src={logo} />{name}</> },
-    ];
-  }, [data]);
-
-  const awayTeamData = useMemo<DisplayDataRow[] | undefined>(() => {
-    console.log('qwe',data)
-    if (!data?.awayTeam) {
-      return;
-    }
-    const { name, logo } = data.awayTeam;
-
-
-    return [
-      { title: "Название", value: <><Avatar size={20} src={logo} />{name}</> },
-    ];
-  }, [data]);
-
-
-  const receiverRows = useMemo<DisplayDataRow[] | undefined>(() => {
-    return initData && initData.receiver
-      ? getUserRows(initData.receiver)
-      : undefined;
-  }, [initData]);
-
-  const chatRows = useMemo<DisplayDataRow[] | undefined>(() => {
-    if (!initData?.chat) {
-      return;
-    }
-    const { id, title, type, username, photoUrl } = initData.chat;
-
-    return [
-      { title: "id", value: id.toString() },
-      { title: "title", value: title },
-      { title: "type", value: type },
-      { title: "username", value: username },
-      { title: "photo_url", value: photoUrl },
-    ];
-  }, [initData]);
-
-  if (!basicDataRows) {
-    return (
-      <Placeholder
-        header="Oops"
-        description="Application was launched with missing init data"
-      >
-        <img
-          alt="Telegram sticker"
-          src="https://xelene.me/telegram.gif"
-          style={{ display: "block", width: "144px", height: "144px" }}
-        />
-      </Placeholder>
-    );
-  }
   return (
-    <List>
-      {userRows && <DisplayData header={"ИИ прогноз"} rows={userRows} />}
+    <>
       <Section>
-        <Accordion
-          expanded={accordionExpaned2}
-          onChange={() => {
-            setAccordionExpaned2(!accordionExpaned2);
+        <div
+          style={{
+            display: "flex",
+            padding: "24px",
+            justifyContent: "space-between",
           }}
         >
-          <AccordionSummary>Общие данные</AccordionSummary>
-          <AccordionContent>
-            <div
-              style={{
-                padding: "10px 20px 20px",
-              }}
-            >
-              <DisplayData rows={basicDataRows} />
-            </div>
-          </AccordionContent>
-        </Accordion>
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: 10,
+              height: "38px",
+            }}
+          >
+            <Avatar size={28} src={data?.participants[0].image_path} />
+            <Headline weight="3">{data?.participants[0].name}</Headline>
+          </div>
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: 10,
+              height: "38px",
+            }}
+          >
+            <Headline weight="3">{data?.participants[1].name}</Headline>
+            <Avatar size={28} src={data?.participants[1].image_path} />
+          </div>
+        </div>
       </Section>
-      <Section>
-        <Accordion
-          expanded={accordionExpaned}
-          onChange={() => {
-            setAccordionExpaned(!accordionExpaned);
-          }}
+      <Divider />
+      {userRows && <DisplayData rows={userRows} />}
+      <TabsList
+        style={{
+          position: "sticky",
+          top: 0,
+          zIndex: 10,
+          background: "#232E3C",
+        }}
+      >
+        <TabsList.Item
+          onClick={() => setSelectedTab("prematch")}
+          selected={selectedTab === "prematch"}
         >
-          <AccordionSummary>Принимающая команда</AccordionSummary>
-          <AccordionContent>
-            <div
-              style={{
-                padding: "10px 20px 20px",
-              }}
-            >
-              <DisplayData rows={homeTeamData} />
-            </div>
-          </AccordionContent>
-        </Accordion>
-      </Section>
-      <Section>
-        <Accordion
-          expanded={accordionExpaned1}
-          onChange={() => {
-            setAccordionExpaned1(!accordionExpaned1);
-          }}
+          <Headline weight="3">Прематч</Headline>
+        </TabsList.Item>
+        <TabsList.Item
+          onClick={() => setSelectedTab("predictions")}
+          selected={selectedTab === "predictions"}
         >
-          <AccordionSummary>Гостевая команда</AccordionSummary>
-          <AccordionContent>
-            <div
-              style={{
-                padding: "10px 20px 20px",
-              }}
-            >
-              <DisplayData rows={awayTeamData} />
-            </div>
-          </AccordionContent>
-        </Accordion>
-      </Section>
-      
-      {/* <Section>
-        <Accordion
-          expanded={accordionExpaned3}
-          onChange={() => {
-            setAccordionExpaned3(!accordionExpaned3);
-          }}
+          <Headline weight="3">Прогнозы</Headline>
+        </TabsList.Item>
+        {/* <TabsList.Item
+          onClick={() => setSelectedTab("h2h")}
+          selected={selectedTab === "h2h"}
         >
-          <AccordionSummary>Погода</AccordionSummary>
-          <AccordionContent>
-            <div
-              style={{
-                padding: "10px 20px 20px",
-              }}
-            >
-            </div>
-          </AccordionContent>
-        </Accordion>
-      </Section> */}
-
-      {receiverRows && <DisplayData header={"Receiver"} rows={receiverRows} />}
-      {chatRows && <DisplayData header={"Chat"} rows={chatRows} />}
-    </List>
+          H2H
+        </TabsList.Item> */}
+      </TabsList>
+      {selectedTab === "prematch" && <PrematchDisplayData />}
+      {selectedTab === "predictions" && (
+        <PredictionsDisplayData
+          winner={predictions?.winner}
+          doubleChance={predictions?.doubleChance}
+          bothTeamsScore={predictions?.bothTeamsScore}
+          moreLess={predictions?.moreLess}
+          correctScore={predictions?.correctScore}
+        />
+      )}
+      {/* {selectedTab === "h2h" && <H2HDispayData />} */}
+    </>
   );
 };
