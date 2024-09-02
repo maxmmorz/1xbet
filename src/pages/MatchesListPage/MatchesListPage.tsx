@@ -14,26 +14,52 @@ import { MatchListItem } from "@/components/Match/MatchListItem";
 moment.locale("ru");
 
 export const MatchesListPage: FC = () => {
-  const [data, setData] = useState([]);
+  const [data, setData] = useState<{
+    string?: Array<{
+      league: {
+        country: {
+          image_path: string;
+        };
+        name: string;
+      };
+      value?: string;
+      id: number;
+      starting_at: string;
+      participants: Array<{
+        image_path: string;
+        name: string;
+      }>;
+    }>;
+  }>({});
   const [searchDate, setSearchDate] = useState(moment().format("YYYY-MM-DD"));
 
   useQuery(
     ["fixtures", searchDate],
     async () => {
       const response = await fetch(
-        `http://localhost:3001/api/fixtures/date/${searchDate}?include=participants;league;league.country`
+        `https://staging.ecozy.de/1xapi/fixtures/date/${searchDate}?include=participants;league;league.country`
       );
 
       return response.json();
     },
     {
       onSuccess: (data) => {
-        const mappedByLeadue = data.data.reduce((acc, cur) => {
-          return {
-            ...acc,
-            [cur.league.name]: [...(acc[cur.league.name] || []), cur],
-          };
-        }, {});
+        const mappedByLeadue = data.data.reduce(
+          (
+            acc: { [key: string]: string },
+            cur: {
+              league: {
+                name: string;
+              };
+            }
+          ) => {
+            return {
+              ...acc,
+              [cur.league.name]: [...(acc[cur.league.name] || []), cur],
+            };
+          },
+          {}
+        );
 
         setData(mappedByLeadue);
       },
@@ -63,7 +89,10 @@ export const MatchesListPage: FC = () => {
                     backgroundColor: "#17212B",
                   }}
                 >
-                  <Avatar size={28} src={value[0].league.country.image_path} />
+                  <Avatar
+                    size={28}
+                    src={value?.[0]?.league.country.image_path}
+                  />
                   {value[0]?.league.name}
                 </Headline>
               }

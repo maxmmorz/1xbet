@@ -3,7 +3,6 @@ import {
   Cell,
   Image,
   List,
-  Avatar,
   FixedLayout,
 } from "@telegram-apps/telegram-ui";
 import type { FC } from "react";

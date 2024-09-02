@@ -1,6 +1,12 @@
 import { type FC, useMemo, useState } from "react";
 import { useParams } from "react-router-dom";
-import { Avatar, Divider, Headline, Section, TabsList } from "@telegram-apps/telegram-ui";
+import {
+  Avatar,
+  Divider,
+  Headline,
+  Section,
+  TabsList,
+} from "@telegram-apps/telegram-ui";
 import { useQuery } from "react-query";
 import { DisplayData } from "@/components/DisplayData/DisplayData";
 import moment from "moment";
@@ -11,7 +17,16 @@ import {
 } from "@/components/PredictionsDisplayData/PredictionsDisplayData";
 
 export const MatchDescriptionPage: FC = () => {
-  const [data, setData] = useState();
+  const [data, setData] = useState<{
+    starting_at: string;
+    participants: Array<{ image_path: string; name: string }>;
+    league: {
+      name: string;
+      country: {
+        image_path: string;
+      };
+    };
+  }>();
   const [predictions, setPredictions] = useState<PredictionsDisplayDataProps>();
   const [selectedTab, setSelectedTab] = useState("predictions");
   const { id } = useParams();
@@ -20,7 +35,7 @@ export const MatchDescriptionPage: FC = () => {
     ["data", id],
     async () => {
       const response = await fetch(
-        `http://localhost:3001/api/fixtures/${id}?include=participants;league;league.country;predictions;predictions.type`
+        `https://staging.ecozy.de/1xapi/fixtures/${id}?include=participants;league;league.country;predictions;predictions.type`
       );
 
       return response.json();
@@ -28,7 +43,14 @@ export const MatchDescriptionPage: FC = () => {
     {
       onSuccess: (data) => {
         const mappedByPredictionType = data.data.predictions.reduce(
-          (acc, cur) => ({
+          (
+            acc: object,
+            cur: {
+              type: {
+                developer_name: string;
+              };
+            }
+          ) => ({
             ...acc,
             [cur.type.developer_name]: cur,
           }),
@@ -111,8 +133,6 @@ export const MatchDescriptionPage: FC = () => {
     }
   );
 
-  console.log("qwe1", data);
-
   const userRows = useMemo(() => {
     return [
       { value: moment(data?.starting_at).format("HH:mm - DD MMMM YYYY") },
@@ -126,6 +146,10 @@ export const MatchDescriptionPage: FC = () => {
       },
     ];
   }, [data]);
+
+  if (!data) {
+    return null;
+  }
 
   return (
     <>

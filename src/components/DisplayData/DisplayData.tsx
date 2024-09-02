@@ -8,7 +8,7 @@ import { Link } from '@/components/Link/Link.tsx';
 import './DisplayData.css';
 
 export type DisplayDataRow =
-  & { title: string }
+  & { title?: string }
   & (
   | { type: 'link'; value?: string }
   | { value: ReactNode }
