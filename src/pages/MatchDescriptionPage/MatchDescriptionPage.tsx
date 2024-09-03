@@ -6,6 +6,8 @@ import {
   Headline,
   Section,
   TabsList,
+  FixedLayout,
+  Button,
 } from "@telegram-apps/telegram-ui";
 import { useQuery } from "react-query";
 import { DisplayData } from "@/components/DisplayData/DisplayData";
@@ -229,6 +231,16 @@ export const MatchDescriptionPage: FC = () => {
           team2={data.participants[1].id}
         />
       )}
+      <FixedLayout
+        style={{
+          padding: 16,
+          paddingBottom: 30
+        }}
+      >
+        <Button size="l" stretched style={{ zIndex: 100 }}>
+          Сделать ставку
+        </Button>
+      </FixedLayout>
     </>
   );
 };
