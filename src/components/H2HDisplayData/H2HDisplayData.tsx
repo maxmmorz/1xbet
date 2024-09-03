@@ -95,8 +95,8 @@ export const H2HDisplayData: FC<H2HDisplayDataProps> = ({ team1, team2 }) => {
                           size={20}
                           src={item?.participants?.[1].image_path}
                         />
-                        <h4>{item?.participants?.[1].name}</h4>-
-                        <h4>
+                        <div>{item?.participants?.[1].name}</div>-
+                        <div>
                           {
                             item?.scores.filter(
                               (score) =>
@@ -104,7 +104,7 @@ export const H2HDisplayData: FC<H2HDisplayDataProps> = ({ team1, team2 }) => {
                                 score.score.participant === "away"
                             )?.[0].score.goals
                           }
-                        </h4>
+                        </div>
                       </div>
                     </div>
                   </div>
