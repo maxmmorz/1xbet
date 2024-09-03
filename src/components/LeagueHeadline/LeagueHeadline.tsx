@@ -1,7 +1,7 @@
 import { Avatar, Headline } from "@telegram-apps/telegram-ui";
 import { FC } from "react";
 
-import './LeagueHeadline.css'
+import "./LeagueHeadline.css";
 
 type LeagueHeadlineProps = {
   leagueName: string;
@@ -13,9 +13,9 @@ export const LeagueHeadline: FC<LeagueHeadlineProps> = ({
   leagueEmblemUrl,
 }) => {
   return (
-    <Headline weight="1" className="league-headline">
+    <div className="league-headline">
       <Avatar size={28} src={leagueEmblemUrl} />
-      {leagueName}
-    </Headline>
+      <Headline weight="3">{leagueName}</Headline>
+    </div>
   );
 };

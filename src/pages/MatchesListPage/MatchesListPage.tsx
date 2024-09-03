@@ -42,7 +42,7 @@ export const MatchesListPage: FC = () => {
     },
     {
       onSuccess: (data) => {
-        const mappedByLeadue = data.data.reduce(
+        const mappedByLeague = data.data.reduce(
           (
             acc: { [key: string]: string },
             cur: {
@@ -59,7 +59,9 @@ export const MatchesListPage: FC = () => {
           {}
         );
 
-        setData(mappedByLeadue);
+        console.log(data.data)
+
+        setData(mappedByLeague);
       },
     }
   );
