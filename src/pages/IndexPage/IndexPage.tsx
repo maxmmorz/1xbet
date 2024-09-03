@@ -25,9 +25,9 @@ export const IndexPage: FC = () => {
             before={
               <Image src={tonSvg} style={{ backgroundColor: "#007AFF" }} />
             }
-            subtitle="Прогнозы искусственного интеллекта"
+            subtitle="Твой надежный помощник в ставках на спорт!"
           >
-            1XBET
+            1XAI
           </Cell>
         </Link>
       </Section>
@@ -36,20 +36,20 @@ export const IndexPage: FC = () => {
       // footer='These pages help developer to learn more about current launch information'
       >
         <Link to="/matches-list">
-          <Cell>Выберать Лигу и Матч</Cell>
+          <Cell subtitle="Турниры и матчи">Предстоящие события</Cell>
         </Link>
         {/* <Link to='/init-data'>
           <Cell subtitle='Лиги, матчи'>Предстоящие матчи</Cell>
         </Link> */}
         <Link to="/">
-          <Cell>История прогнозов Искусственного Интеллекта</Cell>
+          <Cell>История прогнозов</Cell>
         </Link>
         <Link to="/launch-params">
-          <Cell subtitle="Пользовательская информация">Настройки</Cell>
+          <Cell>Настройки</Cell>
         </Link>
       </Section>
 
-      <FixedLayout vertical="bottom">
+      <FixedLayout vertical="bottom" style={{ paddingBottom: '30px' }}>
         <Section
         // header='Application Launch Data'
         // footer='These pages help developer to learn more about current launch information'
