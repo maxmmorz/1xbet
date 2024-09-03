@@ -35,7 +35,7 @@ export const MatchesListPage: FC = () => {
     ["fixtures", searchDate],
     async () => {
       const response = await fetch(
-        `https://staging.ecozy.de/1xapi/fixtures/date/${searchDate}?include=participants;league;league.country`
+        `https://staging.ecozy.de/1xapi/fixtures/date/${searchDate}?include=participants;league;league.country&locale=ru`
       );
 
       return response.json();

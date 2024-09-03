@@ -71,7 +71,7 @@ export const MatchListItem: FC<DisplayDataProps> = ({ header, rows }) => (
               }
               readOnly
               multiline={true}
-            ></Cell>
+            />
           </Link>
         );
       })}

@@ -10,18 +10,20 @@ import {
 import { useQuery } from "react-query";
 import { DisplayData } from "@/components/DisplayData/DisplayData";
 import moment from "moment";
+
 import { PrematchDisplayData } from "@/components/PrematchDisplayData/PrematchDisplayData";
 import {
   PredictionsDisplayData,
   PredictionsDisplayDataProps,
 } from "@/components/PredictionsDisplayData/PredictionsDisplayData";
+import { H2HDisplayData } from "@/components/H2HDisplayData/H2HDisplayData";
 
 import "./MatchDescriptionPage.css";
 
 export const MatchDescriptionPage: FC = () => {
   const [data, setData] = useState<{
     starting_at: string;
-    participants: Array<{ image_path: string; name: string }>;
+    participants: Array<{ image_path: string; name: string; id: number }>;
     league: {
       name: string;
       country: {
@@ -37,7 +39,7 @@ export const MatchDescriptionPage: FC = () => {
     ["data", id],
     async () => {
       const response = await fetch(
-        `https://staging.ecozy.de/1xapi/fixtures/${id}?include=participants;league;league.country;predictions;predictions.type`
+        `https://staging.ecozy.de/1xapi/fixtures/${id}?include=participants;league;league.country;predictions;predictions.type&locale=ru`
       );
 
       return response.json();
@@ -182,7 +184,9 @@ export const MatchDescriptionPage: FC = () => {
               height: "38px",
             }}
           >
-            <Headline weight="3">{data?.participants[1].name}</Headline>
+            <Headline style={{ textAlign: "end" }} weight="3">
+              {data?.participants[1].name}
+            </Headline>
             <Avatar size={28} src={data?.participants[1].image_path} />
           </div>
         </div>
@@ -202,12 +206,12 @@ export const MatchDescriptionPage: FC = () => {
         >
           <Headline weight="2">Прогнозы</Headline>
         </TabsList.Item>
-        {/* <TabsList.Item
+        <TabsList.Item
           onClick={() => setSelectedTab("h2h")}
           selected={selectedTab === "h2h"}
         >
           H2H
-        </TabsList.Item> */}
+        </TabsList.Item>
       </TabsList>
       {selectedTab === "prematch" && <PrematchDisplayData />}
       {selectedTab === "predictions" && (
@@ -219,7 +223,12 @@ export const MatchDescriptionPage: FC = () => {
           correctScore={predictions?.correctScore}
         />
       )}
-      {/* {selectedTab === "h2h" && <H2HDispayData />} */}
+      {selectedTab === "h2h" && (
+        <H2HDisplayData
+          team1={data.participants[0].id}
+          team2={data.participants[1].id}
+        />
+      )}
     </>
   );
 };
