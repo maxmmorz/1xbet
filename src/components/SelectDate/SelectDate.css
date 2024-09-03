@@ -1,0 +1,8 @@
+.select-date {
+    width: 100vw;
+    overflow: scroll;
+    position: fixed;
+    bottom: 0;
+    background: var(--tg-theme-bg-color);
+    z-index: 10;
+}

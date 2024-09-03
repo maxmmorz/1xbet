@@ -1,0 +1,12 @@
+.league-headline {
+    padding-left: 24px;
+    padding-top: 12px;
+    padding-bottom: 12px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    background: var(--tg-theme-bg-color);
+}

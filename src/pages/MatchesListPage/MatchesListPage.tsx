@@ -1,15 +1,13 @@
 import { useState, type FC } from "react";
-import {
-  Avatar,
-  Headline,
-  InlineButtons,
-  List,
-} from "@telegram-apps/telegram-ui";
+import { List } from "@telegram-apps/telegram-ui";
 import { useQuery } from "react-query";
 import moment from "moment";
+
 import "moment/dist/locale/ru";
 
 import { MatchListItem } from "@/components/Match/MatchListItem";
+import { LeagueHeadline } from "@/components/LeagueHeadline/LeagueHeadline";
+import { SelectDate } from "@/components/SelectDate/SelectDate";
 
 moment.locale("ru");
 
@@ -68,93 +66,23 @@ export const MatchesListPage: FC = () => {
 
   return (
     <>
-      <List style={{ paddingBottom: "50px" }}>
+      <List style={{ paddingBottom: "100px" }}>
         {Object.entries(data).map(([key, value]) => {
           return (
             <MatchListItem
               key={key}
               header={
-                <Headline
-                  weight="1"
-                  style={{
-                    paddingLeft: "24px",
-                    paddingTop: "12px",
-                    paddingBottom: "12px",
-                    display: "flex",
-                    alignItems: "center",
-                    gap: 10,
-                    position: "sticky",
-                    top: 0,
-                    zIndex: 10,
-                    backgroundColor: "#17212B",
-                  }}
-                >
-                  <Avatar
-                    size={28}
-                    src={value?.[0]?.league.country.image_path}
-                  />
-                  {value[0]?.league.name}
-                </Headline>
+                <LeagueHeadline
+                  leagueName={value[0]?.league.name}
+                  leagueEmblemUrl={value?.[0]?.league.country.image_path}
+                />
               }
               rows={value}
             />
           );
         })}
       </List>
-      <InlineButtons
-        mode="plain"
-        style={{
-          width: "100vw",
-          overflow: "scroll",
-          position: "fixed",
-          bottom: 0,
-          backgroundColor: "#212121",
-          zIndex: "10",
-        }}
-      >
-        <InlineButtons.Item
-          style={{
-            backgroundColor:
-              searchDate === moment().format("YYYY-MM-DD")
-                ? "#2f2f2f"
-                : "#212121",
-          }}
-          onClick={() => {
-            setSearchDate(moment().format("YYYY-MM-DD"));
-          }}
-          mode="bezeled"
-        >
-          Сегодня
-        </InlineButtons.Item>
-        <InlineButtons.Item
-          style={{
-            backgroundColor:
-              searchDate === moment().add(1, "day").format("YYYY-MM-DD")
-                ? "#2f2f2f"
-                : "#212121",
-          }}
-          onClick={() => {
-            setSearchDate(moment().add(1, "day").format("YYYY-MM-DD"));
-          }}
-          text={moment().add(1, "day").format("DD")}
-        >
-          {moment().add(1, "day").format("MMM")}
-        </InlineButtons.Item>
-        <InlineButtons.Item
-          style={{
-            backgroundColor:
-              searchDate === moment().add(2, "day").format("YYYY-MM-DD")
-                ? "#2f2f2f"
-                : "#212121",
-          }}
-          onClick={() => {
-            setSearchDate(moment().add(2, "day").format("YYYY-MM-DD"));
-          }}
-          text={moment().add(2, "day").format("DD")}
-        >
-          {moment().add(2, "day").format("MMM")}
-        </InlineButtons.Item>
-      </InlineButtons>
+      <SelectDate date={searchDate} onDateChangeCallback={setSearchDate} />
     </>
   );
 };

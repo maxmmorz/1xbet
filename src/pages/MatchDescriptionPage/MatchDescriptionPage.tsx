@@ -16,6 +16,8 @@ import {
   PredictionsDisplayDataProps,
 } from "@/components/PredictionsDisplayData/PredictionsDisplayData";
 
+import "./MatchDescriptionPage.css";
+
 export const MatchDescriptionPage: FC = () => {
   const [data, setData] = useState<{
     starting_at: string;
@@ -187,25 +189,18 @@ export const MatchDescriptionPage: FC = () => {
       </Section>
       <Divider />
       {userRows && <DisplayData rows={userRows} />}
-      <TabsList
-        style={{
-          position: "sticky",
-          top: 0,
-          zIndex: 10,
-          background: "#232E3C",
-        }}
-      >
+      <TabsList className="tab-list-header">
         <TabsList.Item
           onClick={() => setSelectedTab("prematch")}
           selected={selectedTab === "prematch"}
         >
-          <Headline weight="3">Прематч</Headline>
+          <Headline weight="2">Прематч</Headline>
         </TabsList.Item>
         <TabsList.Item
           onClick={() => setSelectedTab("predictions")}
           selected={selectedTab === "predictions"}
         >
-          <Headline weight="3">Прогнозы</Headline>
+          <Headline weight="2">Прогнозы</Headline>
         </TabsList.Item>
         {/* <TabsList.Item
           onClick={() => setSelectedTab("h2h")}
