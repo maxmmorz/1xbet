@@ -87,7 +87,7 @@ export const PredictionsDisplayData: FC<PredictionsDisplayDataProps> = ({
   }
 
   return (
-    <List style={{ paddingBottom: '100px' }}>
+    <List style={{ paddingBottom: '100px', paddingTop: '12px' }}>
       <Section>
         <Accordion
           expanded={openedAccordions.winner}

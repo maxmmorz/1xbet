@@ -34,6 +34,17 @@ export const MatchDescriptionPage: FC = () => {
     };
   }>();
   const [predictions, setPredictions] = useState<PredictionsDisplayDataProps>();
+  const [prematch, setPrematch] = useState<{
+    stadiumName: string;
+    stadiumCityName: string;
+    weather: {
+      description: string;
+      clouds: string;
+      temperature: number;
+      humidity: string;
+      wind: number;
+    };
+  }>();
   const [selectedTab, setSelectedTab] = useState("predictions");
   const { id } = useParams();
 
@@ -41,7 +52,7 @@ export const MatchDescriptionPage: FC = () => {
     ["data", id],
     async () => {
       const response = await fetch(
-        `https://staging.ecozy.de/1xapi/fixtures/${id}?include=participants;league;league.country;predictions;predictions.type&locale=ru`
+        `https://staging.ecozy.de/1xapi/fixtures/${id}?include=participants;participants.coaches;league;league.country;predictions;predictions.type;venue;weatherReport&locale=ru`
       );
 
       return response.json();
@@ -72,7 +83,7 @@ export const MatchDescriptionPage: FC = () => {
         const correctScorePredictions =
           mappedByPredictionType.CORRECT_SCORE_PROBABILITY.predictions.scores;
 
-        const formattedData: PredictionsDisplayDataProps = {
+        const formattedPredictionData: PredictionsDisplayDataProps = {
           winner: {
             "1": winnerPredictions.home,
             X: winnerPredictions.draw,
@@ -133,7 +144,20 @@ export const MatchDescriptionPage: FC = () => {
           },
         };
 
-        setPredictions(formattedData);
+        const formattedPrematchData = {
+          stadiumName: data.data.venue.name,
+          stadiumCityName: data.data.venue.city_name,
+          weather: {
+            description: data.data.weatherreport.description,
+            clouds: data.data.weatherreport.clouds,
+            temperature: data.data.weatherreport.temperature.day,
+            humidity: data.data.weatherreport.humidity,
+            wind: data.data.weatherreport.wind.speed,
+          }
+        };
+
+        setPredictions(formattedPredictionData);
+        setPrematch(formattedPrematchData);
         setData(data.data);
       },
     }
@@ -153,9 +177,11 @@ export const MatchDescriptionPage: FC = () => {
     ];
   }, [data]);
 
-  if (!data) {
+  if (!data || !prematch) {
     return null;
   }
+
+  console.log("qwe", data);
 
   return (
     <>
@@ -215,7 +241,13 @@ export const MatchDescriptionPage: FC = () => {
           H2H
         </TabsList.Item>
       </TabsList>
-      {selectedTab === "prematch" && <PrematchDisplayData />}
+      {selectedTab === "prematch" && (
+        <PrematchDisplayData
+          stadiumName={prematch.stadiumName}
+          stadiumCityName={prematch.stadiumCityName}
+          weather={prematch.weather}
+        />
+      )}
       {selectedTab === "predictions" && (
         <PredictionsDisplayData
           winner={predictions?.winner}
@@ -234,7 +266,7 @@ export const MatchDescriptionPage: FC = () => {
       <FixedLayout
         style={{
           padding: 16,
-          paddingBottom: 30
+          paddingBottom: 30,
         }}
       >
         <Button size="l" stretched style={{ zIndex: 100 }}>
