@@ -1,5 +1,5 @@
 import { useState, type FC } from "react";
-import { List } from "@telegram-apps/telegram-ui";
+import { Divider, List } from "@telegram-apps/telegram-ui";
 import { useQuery } from "react-query";
 import moment from "moment";
 
@@ -59,7 +59,7 @@ export const MatchesListPage: FC = () => {
           {}
         );
 
-        console.log(data.data)
+        console.log(data.data);
 
         setData(mappedByLeague);
       },
@@ -74,10 +74,13 @@ export const MatchesListPage: FC = () => {
             <MatchListItem
               key={key}
               header={
-                <LeagueHeadline
-                  leagueName={value[0]?.league.name}
-                  leagueEmblemUrl={value?.[0]?.league.country.image_path}
-                />
+                <>
+                  <LeagueHeadline
+                    leagueName={value[0]?.league.name}
+                    leagueEmblemUrl={value?.[0]?.league.country.image_path}
+                  />
+                  <Divider />
+                </>
               }
               rows={value}
             />

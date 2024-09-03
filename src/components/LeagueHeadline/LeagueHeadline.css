@@ -1,7 +1,5 @@
 .league-headline {
-    padding-left: 24px;
-    padding-top: 28px;
-    padding-bottom: 12px;
+    padding: 24px;
     display: flex;
     align-items: center;
     gap: 10px;
